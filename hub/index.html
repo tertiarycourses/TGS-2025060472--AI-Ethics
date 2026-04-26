@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsible Generative AI Basics - Course Hub</title>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg: #1a1a2e;
+      --card-bg: #16213e;
+      --border: #3a3a5c;
+      --text: #e0e0e0;
+      --text-muted: #999;
+      --accent: #6c63ff;
+      --accent-light: #8b83ff;
+      --green: #4ade80;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --shadow: rgba(0,0,0,0.3);
+      --lu1: #6c63ff;
+      --lu2: #06b6d4;
+      --lu3: #f59e0b;
+      --heading-color: #8b83ff;
+      --chip-bg: #1e2a45;
+    }
+    [data-theme="light"] {
+      --bg: #f5f0e8;
+      --card-bg: #fffdf7;
+      --border: #c4b99a;
+      --text: #2c2c2c;
+      --text-muted: #666;
+      --accent: #4f46e5;
+      --accent-light: #6366f1;
+      --green: #16a34a;
+      --orange: #d97706;
+      --red: #dc2626;
+      --shadow: rgba(0,0,0,0.08);
+      --lu1: #4f46e5;
+      --lu2: #0891b2;
+      --lu3: #d97706;
+      --heading-color: #4f46e5;
+      --chip-bg: #f0ebe0;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Georgia','Times New Roman',serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    .container { max-width:1100px; margin:0 auto; padding:2rem; }
+    header { text-align:center; margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:2px solid var(--border); }
+    header h1 { font-size:2.2rem; font-weight:700; letter-spacing:-0.5px; margin-bottom:0.5rem; }
+    header p { font-size:1rem; color:var(--text-muted); max-width:700px; margin:0 auto; line-height:1.6; }
+    .theme-toggle { position:fixed; top:1.2rem; right:1.5rem; z-index:100; background:var(--card-bg); border:1px solid var(--border); border-radius:50px; padding:0.5rem 0.9rem; cursor:pointer; font-size:1.2rem; line-height:1; transition:background 0.2s,border-color 0.2s; display:flex; align-items:center; gap:0.4rem; }
+    .theme-toggle:hover { border-color:var(--accent); }
+    .theme-toggle .label { font-size:0.75rem; font-family:Georgia,serif; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+
+    .lu-section { margin-bottom:2.5rem; }
+    .lu-header { display:flex; align-items:center; gap:0.8rem; margin-bottom:1.2rem; }
+    .lu-badge { padding:0.3rem 0.8rem; border-radius:20px; font-size:0.8rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:0.5px; }
+    .lu-badge.lu1 { background:var(--lu1); }
+    .lu-badge.lu2 { background:var(--lu2); }
+    .lu-badge.lu3 { background:var(--lu3); }
+    .lu-title { font-size:1.4rem; }
+
+    .topic-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1rem; }
+    .topic-card { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:1.3rem; transition:transform 0.15s,box-shadow 0.15s,border-color 0.15s; display:flex; flex-direction:column; }
+    .topic-card:hover { transform:translateY(-2px); box-shadow:0 6px 20px var(--shadow); }
+    .topic-card.lu1-border:hover { border-color:var(--lu1); }
+    .topic-card.lu2-border:hover { border-color:var(--lu2); }
+    .topic-card.lu3-border:hover { border-color:var(--lu3); }
+    .topic-num { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:0.4rem; }
+    .topic-card h3 { font-size:1rem; line-height:1.4; margin-bottom:0.6rem; }
+    .topic-card p { font-size:0.88rem; color:var(--text-muted); line-height:1.5; margin-bottom:1rem; flex:1; }
+    .topic-card .activity-link { display:inline-flex; align-items:center; gap:0.4rem; padding:0.5rem 1rem; background:var(--chip-bg); border:1px solid var(--border); border-radius:6px; color:var(--accent); text-decoration:none; font-size:0.85rem; font-family:Georgia,serif; transition:background 0.15s,border-color 0.15s; }
+    .topic-card .activity-link:hover { border-color:var(--accent); background:var(--accent); color:#fff; }
+
+    .bonus-section { margin-top:2rem; padding-top:1.5rem; border-top:2px solid var(--border); }
+    .bonus-section h2 { font-size:1.2rem; margin-bottom:1rem; color:var(--heading-color); }
+    .bonus-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; }
+    .bonus-card { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:1.2rem; text-decoration:none; color:var(--text); transition:transform 0.15s,box-shadow 0.15s,border-color 0.15s; }
+    .bonus-card:hover { transform:translateY(-2px); box-shadow:0 6px 20px var(--shadow); border-color:var(--accent); }
+    .bonus-card h3 { font-size:1rem; margin-bottom:0.4rem; }
+    .bonus-card p { font-size:0.85rem; color:var(--text-muted); line-height:1.4; }
+
+    footer { text-align:center; padding:2rem 0 1rem; font-size:0.8rem; color:var(--text-muted); border-top:1px solid var(--border); margin-top:2rem; }
+    @media(max-width:600px) { .topic-grid,.bonus-grid { grid-template-columns:1fr; } header h1 { font-size:1.6rem; } }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span id="themeIcon">&#x2600;&#xFE0F;</span>
+    <span class="label" id="themeLabel">Light</span>
+  </button>
+
+  <div class="container">
+    <header>
+      <h1>Responsible Generative AI Basics</h1>
+      <p>A hands-on course covering ethical principles, privacy techniques, and best practices for responsible generative AI. Click any activity to launch the interactive web app.</p>
+    </header>
+
+    <!-- LU1 -->
+    <div class="lu-section">
+      <div class="lu-header">
+        <span class="lu-badge lu1">LU1</span>
+        <h2 class="lu-title">Ethical Principles of Generative AI</h2>
+      </div>
+      <div class="topic-grid">
+        <div class="topic-card lu1-border">
+          <div class="topic-num">Topic 1</div>
+          <h3>Ethical Considerations & Potential Risks</h3>
+          <p>Explore the ethical risks of generative AI through interactive dilemma scenarios covering hallucinations, bias, deepfakes, and more.</p>
+          <a href="../lu1-ethical-principles/ethical-dilemma/" class="activity-link">&#x1F3AE; Ethical Dilemma Simulator</a>
+        </div>
+        <div class="topic-card lu1-border">
+          <div class="topic-num">Topic 2</div>
+          <h3>Ethical Principles in AI</h3>
+          <p>Learn and test your knowledge of core AI ethical principles: fairness, transparency, accountability, privacy, beneficence, and human agency.</p>
+          <a href="../lu1-ethical-principles/principles-quiz/" class="activity-link">&#x1F4DD; Principles Matching Quiz</a>
+        </div>
+        <div class="topic-card lu1-border">
+          <div class="topic-num">Topic 2</div>
+          <h3>Prompt Injection Playground</h3>
+          <p>Attack simulated AI systems with increasing defenses. Learn how prompt injection threatens transparency, accountability, and safety through hands-on challenges.</p>
+          <a href="../lu1-ethical-principles/prompt-injection/" class="activity-link">&#x1F3AD; Prompt Injection</a>
+        </div>
+        <div class="topic-card lu1-border">
+          <div class="topic-num">Topic 3</div>
+          <h3>Apply Ethical Principles in Decision-Making</h3>
+          <p>Walk through a structured ethical decision-making framework to analyse AI scenarios and generate documented decisions.</p>
+          <a href="../lu1-ethical-principles/decision-framework/" class="activity-link">&#x1F9ED; Decision Framework Tool</a>
+        </div>
+        <div class="topic-card lu1-border">
+          <div class="topic-num">Topic 4</div>
+          <h3>Professional Scepticism on AI Output</h3>
+          <p>Evaluate AI-generated content with a structured checklist and receive a scepticism score with recommendations.</p>
+          <a href="../lu1-ethical-principles/skepticism-checker/" class="activity-link">&#x1F50D; Scepticism Checker</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- LU2 -->
+    <div class="lu-section">
+      <div class="lu-header">
+        <span class="lu-badge lu2">LU2</span>
+        <h2 class="lu-title">Generative AI Privacy Techniques</h2>
+      </div>
+      <div class="topic-grid">
+        <div class="topic-card lu2-border">
+          <div class="topic-num">Topics 1 & 2</div>
+          <h3>Data Anonymisation & Privacy Measures</h3>
+          <p>Interactive demo of anonymisation techniques: masking, generalisation, pseudonymisation, k-anonymity, and differential privacy.</p>
+          <a href="../lu2-privacy/dataprivacy/" class="activity-link">&#x1F510; Anonymisation Demo</a>
+        </div>
+        <div class="topic-card lu2-border">
+          <div class="topic-num">Topic 2</div>
+          <h3>Python Anonymisation Pipeline</h3>
+          <p>Build a step-by-step anonymisation pipeline using Python techniques: UUID pseudo-IDs, ASCII shifting, data masking, generalisation, and column dropping.</p>
+          <a href="../lu2-privacy/anonymizer-python/" class="activity-link">&#x1F40D; Python Pipeline</a>
+        </div>
+        <div class="topic-card lu2-border">
+          <div class="topic-num">Topic 3</div>
+          <h3>Ethical AI Data Use Guidelines</h3>
+          <p>Create a comprehensive AI data handling policy with an interactive wizard covering classification, consent, encryption, and incident response.</p>
+          <a href="../lu2-privacy/privacy-policy/" class="activity-link">&#x1F4CB; Policy Generator</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- LU3 -->
+    <div class="lu-section">
+      <div class="lu-header">
+        <span class="lu-badge lu3">LU3</span>
+        <h2 class="lu-title">Best Practices of Responsible Generative AI</h2>
+      </div>
+      <div class="topic-grid">
+        <div class="topic-card lu3-border">
+          <div class="topic-num">Topics 1 & 2</div>
+          <h3>Responsible AI Principles & System Comparison</h3>
+          <p>Compare AI systems across IP compliance, data privacy, environmental impact, bias mitigation, and transparency with a visual radar chart.</p>
+          <a href="../lu3-best-practices/ai-comparison/" class="activity-link">&#x1F4CA; AI Comparison Matrix</a>
+        </div>
+        <div class="topic-card lu3-border">
+          <div class="topic-num">Topic 1</div>
+          <h3>Differential Privacy Explorer</h3>
+          <p>Experiment with the Laplace mechanism, randomised response, and privacy budgets. Visualise the trade-off between privacy and data utility.</p>
+          <a href="../lu3-best-practices/differential-privacy/" class="activity-link">&#x1F510; Differential Privacy</a>
+        </div>
+        <div class="topic-card lu3-border">
+          <div class="topic-num">Topic 1</div>
+          <h3>Explainable AI (XAI) Explorer</h3>
+          <p>Understand LIME and SHAP through an interactive loan approval model. Adjust features, see predictions, and compare explanation methods side by side.</p>
+          <a href="../lu3-best-practices/xai-explorer/" class="activity-link">&#x1F9E0; XAI Explorer</a>
+        </div>
+        <div class="topic-card lu3-border">
+          <div class="topic-num">Topic 3</div>
+          <h3>AI Resource Allocation Paradigms</h3>
+          <p>Simulate how Utilitarian, Egalitarian, and Prioritarian paradigms lead to different AI allocation decisions across healthcare, education, and disaster scenarios.</p>
+          <a href="../lu3-best-practices/ai-resource-allocation/" class="activity-link">&#x2696;&#xFE0F; Resource Allocation</a>
+        </div>
+        <div class="topic-card lu3-border">
+          <div class="topic-num">Topic 3</div>
+          <h3>Compare Ethical Issues in AI Applications</h3>
+          <p>Analyse real-world AI ethics case studies across healthcare, finance, creative industries, education, and employment.</p>
+          <a href="../lu3-best-practices/ethics-case-study/" class="activity-link">&#x1F4D6; Case Study Analyzer</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bonus -->
+    <div class="bonus-section">
+      <h2>Bonus Activities</h2>
+      <div class="bonus-grid">
+        <a href="../index.html" class="bonus-card">
+          <h3>&#x1F9E0; Cognitive Threat Matrix</h3>
+          <p>AI risk scenario generator exploring generative AI threats through cognitive biases. Powered by AI.</p>
+        </a>
+      </div>
+    </div>
+
+    <footer>
+      Responsible Generative AI Basics &mdash; Course Materials
+    </footer>
+  </div>
+
+  <script>
+    function toggleTheme(){const h=document.documentElement,c=h.getAttribute('data-theme'),n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('theme',n);updateBtn(n);}
+    function updateBtn(t){document.getElementById('themeIcon').innerHTML=t==='dark'?'&#x2600;&#xFE0F;':'&#x1F319;';document.getElementById('themeLabel').textContent=t==='dark'?'Light':'Dark';}
+    (function(){const s=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',s);updateBtn(s);})();
+  </script>
+</body>
+</html>

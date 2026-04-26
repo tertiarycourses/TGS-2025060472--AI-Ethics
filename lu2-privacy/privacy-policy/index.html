@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ethical AI Data Policy Generator</title>
+  <style>
+    :root,[data-theme="dark"]{--bg:#1a1a2e;--card-bg:#16213e;--border:#3a3a5c;--text:#e0e0e0;--text-muted:#999;--accent:#06b6d4;--accent-light:#22d3ee;--green:#4ade80;--shadow:rgba(0,0,0,0.3);--heading-color:#22d3ee;--input-bg:#0f1729;--chip-bg:#1e2a45;--chip-hover:#2a3a5c;--step-inactive:#3a3a5c;--step-active:#06b6d4;}
+    [data-theme="light"]{--bg:#f5f0e8;--card-bg:#fffdf7;--border:#c4b99a;--text:#2c2c2c;--text-muted:#666;--accent:#0891b2;--accent-light:#06b6d4;--green:#16a34a;--shadow:rgba(0,0,0,0.08);--heading-color:#0891b2;--input-bg:#fff;--chip-bg:#fff;--chip-hover:#f0ebe0;--step-inactive:#c4b99a;--step-active:#0891b2;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Georgia','Times New Roman',serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    .container{max-width:900px;margin:0 auto;padding:2rem;}
+    header{text-align:center;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:2px solid var(--border);}
+    header h1{font-size:2rem;margin-bottom:0.5rem;}
+    header p{color:var(--text-muted);max-width:600px;margin:0 auto;line-height:1.6;}
+    .theme-toggle{position:fixed;top:1.2rem;right:1.5rem;z-index:100;background:var(--card-bg);border:1px solid var(--border);border-radius:50px;padding:0.5rem 0.9rem;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;gap:0.4rem;}
+    .theme-toggle:hover{border-color:var(--accent);}
+    .theme-toggle .label{font-size:0.75rem;font-family:Georgia,serif;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+    .nav-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+    .nav-bar a{color:var(--accent);text-decoration:none;font-size:0.9rem;}
+    .nav-bar a:hover{text-decoration:underline;}
+
+    .wizard-progress{display:flex;gap:0.5rem;margin-bottom:2rem;}
+    .wizard-dot{flex:1;height:6px;border-radius:3px;background:var(--step-inactive);transition:background 0.3s;}
+    .wizard-dot.active,.wizard-dot.done{background:var(--step-active);}
+
+    .wizard-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1.8rem;margin-bottom:1.5rem;display:none;}
+    .wizard-card.active{display:block;}
+    .wizard-card h2{font-size:1.3rem;color:var(--heading-color);margin-bottom:0.4rem;}
+    .wizard-card .desc{color:var(--text-muted);font-size:0.9rem;line-height:1.6;margin-bottom:1.2rem;}
+    .wizard-card label{display:block;font-size:0.85rem;font-weight:700;margin-bottom:0.4rem;margin-top:1rem;}
+    .wizard-card input[type="text"],.wizard-card select,.wizard-card textarea{width:100%;padding:0.7rem 1rem;border:1px solid var(--border);border-radius:8px;font-family:Georgia,serif;font-size:0.95rem;background:var(--input-bg);color:var(--text);margin-bottom:0.5rem;}
+    .wizard-card textarea{min-height:80px;resize:vertical;}
+    .wizard-card input:focus,.wizard-card select:focus,.wizard-card textarea:focus{outline:none;border-color:var(--accent);}
+
+    .checkbox-group{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.5rem;}
+    .checkbox-group label{display:flex;align-items:flex-start;gap:0.6rem;font-weight:normal;font-size:0.92rem;cursor:pointer;line-height:1.4;margin-top:0;}
+    .checkbox-group input[type="checkbox"]{margin-top:0.2rem;accent-color:var(--accent);width:18px;height:18px;flex-shrink:0;}
+
+    .btn-row{display:flex;gap:0.8rem;justify-content:flex-end;margin-top:1.5rem;}
+    .btn{padding:0.7rem 1.5rem;border:none;border-radius:8px;font-family:Georgia,serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:opacity 0.15s;}
+    .btn-primary{background:var(--accent);color:#fff;}
+    .btn-secondary{background:var(--chip-bg);color:var(--text);border:1px solid var(--border);}
+    .btn:hover{opacity:0.9;}
+
+    .policy-output{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:2rem;display:none;margin-bottom:1.5rem;}
+    .policy-output.visible{display:block;}
+    .policy-output h2{font-size:1.5rem;text-align:center;margin-bottom:0.5rem;color:var(--heading-color);}
+    .policy-output .org-name{text-align:center;color:var(--text-muted);margin-bottom:2rem;font-size:1rem;}
+    .policy-section{margin-bottom:1.5rem;}
+    .policy-section h3{font-size:1.05rem;color:var(--accent);margin-bottom:0.5rem;border-bottom:1px solid var(--border);padding-bottom:0.3rem;}
+    .policy-section p,.policy-section ul{font-size:0.92rem;line-height:1.6;}
+    .policy-section ul{padding-left:1.5rem;}
+    .policy-section li{margin-bottom:0.3rem;}
+    .policy-actions{display:flex;gap:0.8rem;justify-content:center;margin-top:2rem;}
+
+    footer{text-align:center;padding:2rem 0 1rem;font-size:0.8rem;color:var(--text-muted);border-top:1px solid var(--border);margin-top:2rem;}
+    @media print{.theme-toggle,.nav-bar,.policy-actions,.btn-row{display:none!important;}.policy-output{border:none;padding:0;}}
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()"><span id="themeIcon">&#x2600;&#xFE0F;</span><span class="label" id="themeLabel">Light</span></button>
+  <div class="container">
+    <header>
+      <h1>Ethical AI Data Policy Generator</h1>
+      <p>Build a comprehensive data handling policy for AI use in your organisation through a guided wizard.</p>
+    </header>
+    <div class="nav-bar"><a href="../../hub/">&#x2190; Back to Course Hub</a></div>
+
+    <div class="wizard-progress" id="wizProgress"></div>
+
+    <!-- Step 1: Organisation Info -->
+    <div class="wizard-card active" id="wiz0">
+      <h2>Step 1: Organisation Profile</h2>
+      <p class="desc">Provide basic information about your organisation and its AI usage.</p>
+      <label for="orgName">Organisation Name</label>
+      <input type="text" id="orgName" placeholder="e.g., Acme Corporation">
+      <label for="industry">Industry Sector</label>
+      <select id="industry">
+        <option value="">Select...</option>
+        <option>Healthcare</option><option>Financial Services</option><option>Education</option>
+        <option>Technology</option><option>Government</option><option>Retail</option>
+        <option>Manufacturing</option><option>Legal</option><option>Media & Entertainment</option><option>Other</option>
+      </select>
+      <label for="orgSize">Organisation Size</label>
+      <select id="orgSize">
+        <option value="">Select...</option>
+        <option>1-50 employees</option><option>51-200 employees</option><option>201-1000 employees</option><option>1000+ employees</option>
+      </select>
+      <label for="aiTools">AI Tools Currently Used (comma-separated)</label>
+      <input type="text" id="aiTools" placeholder="e.g., ChatGPT, GitHub Copilot, Midjourney">
+      <div class="btn-row"><button class="btn btn-primary" onclick="wizNext(1)">Next &#x2192;</button></div>
+    </div>
+
+    <!-- Step 2: Data Types -->
+    <div class="wizard-card" id="wiz1">
+      <h2>Step 2: Data Classification</h2>
+      <p class="desc">Select the types of sensitive data your organisation handles that could be exposed to AI tools.</p>
+      <label>Data types handled:</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" class="dt" value="Personal Identifiable Information (PII)"> Personal Identifiable Information (PII) &mdash; names, addresses, phone numbers</label>
+        <label><input type="checkbox" class="dt" value="Financial data"> Financial data &mdash; account numbers, transaction records, credit scores</label>
+        <label><input type="checkbox" class="dt" value="Health records"> Health records &mdash; patient data, diagnoses, treatment plans</label>
+        <label><input type="checkbox" class="dt" value="Employee records"> Employee records &mdash; performance reviews, salary info, personal details</label>
+        <label><input type="checkbox" class="dt" value="Intellectual property"> Intellectual property &mdash; trade secrets, proprietary code, designs</label>
+        <label><input type="checkbox" class="dt" value="Customer communications"> Customer communications &mdash; emails, chat logs, feedback</label>
+        <label><input type="checkbox" class="dt" value="Legal documents"> Legal documents &mdash; contracts, compliance records, case files</label>
+        <label><input type="checkbox" class="dt" value="Student records"> Student records &mdash; grades, attendance, disciplinary records</label>
+      </div>
+      <div class="btn-row"><button class="btn btn-secondary" onclick="wizNext(0)">&#x2190; Back</button><button class="btn btn-primary" onclick="wizNext(2)">Next &#x2192;</button></div>
+    </div>
+
+    <!-- Step 3: Regulations -->
+    <div class="wizard-card" id="wiz2">
+      <h2>Step 3: Regulatory Requirements</h2>
+      <p class="desc">Select the regulations and standards your organisation must comply with.</p>
+      <label>Applicable regulations:</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" class="reg" value="GDPR (EU General Data Protection Regulation)"> GDPR &mdash; EU General Data Protection Regulation</label>
+        <label><input type="checkbox" class="reg" value="PDPA (Singapore Personal Data Protection Act)"> PDPA &mdash; Singapore Personal Data Protection Act</label>
+        <label><input type="checkbox" class="reg" value="CCPA (California Consumer Privacy Act)"> CCPA &mdash; California Consumer Privacy Act</label>
+        <label><input type="checkbox" class="reg" value="HIPAA (Health Insurance Portability and Accountability Act)"> HIPAA &mdash; Health Insurance Portability and Accountability Act</label>
+        <label><input type="checkbox" class="reg" value="EU AI Act"> EU AI Act</label>
+        <label><input type="checkbox" class="reg" value="ISO 27001 (Information Security)"> ISO 27001 &mdash; Information Security Management</label>
+        <label><input type="checkbox" class="reg" value="SOC 2 (Service Organization Control)"> SOC 2 &mdash; Service Organization Control</label>
+      </div>
+      <div class="btn-row"><button class="btn btn-secondary" onclick="wizNext(1)">&#x2190; Back</button><button class="btn btn-primary" onclick="wizNext(3)">Next &#x2192;</button></div>
+    </div>
+
+    <!-- Step 4: Safeguards -->
+    <div class="wizard-card" id="wiz3">
+      <h2>Step 4: Safeguards & Controls</h2>
+      <p class="desc">Select the safeguards your organisation will implement for AI data handling.</p>
+      <label>Safeguards to implement:</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" class="sg" value="Data anonymisation before AI input"> Data anonymisation before inputting data to AI tools</label>
+        <label><input type="checkbox" class="sg" value="Encryption at rest and in transit"> Encryption for data at rest and in transit</label>
+        <label><input type="checkbox" class="sg" value="Role-based access controls"> Role-based access controls for AI tools</label>
+        <label><input type="checkbox" class="sg" value="Audit logging of AI interactions"> Audit logging of all AI tool interactions</label>
+        <label><input type="checkbox" class="sg" value="Human review of AI outputs"> Mandatory human review of AI-generated outputs</label>
+        <label><input type="checkbox" class="sg" value="Data minimisation practices"> Data minimisation &mdash; only share necessary data with AI</label>
+        <label><input type="checkbox" class="sg" value="Regular bias and accuracy audits"> Regular bias and accuracy audits of AI outputs</label>
+        <label><input type="checkbox" class="sg" value="Employee training on AI data handling"> Mandatory employee training on AI data handling</label>
+        <label><input type="checkbox" class="sg" value="Vendor security assessment"> Vendor security assessment for all AI tool providers</label>
+        <label><input type="checkbox" class="sg" value="Incident response plan for AI data breaches"> Incident response plan for AI-related data breaches</label>
+      </div>
+      <div class="btn-row"><button class="btn btn-secondary" onclick="wizNext(2)">&#x2190; Back</button><button class="btn btn-primary" onclick="wizNext(4)">Next &#x2192;</button></div>
+    </div>
+
+    <!-- Step 5: Additional Notes -->
+    <div class="wizard-card" id="wiz4">
+      <h2>Step 5: Additional Considerations</h2>
+      <p class="desc">Add any specific requirements or notes for your organisation's AI data policy.</p>
+      <label for="riskTolerance">Risk Tolerance Level</label>
+      <select id="riskTolerance">
+        <option value="Conservative">Conservative &mdash; Minimise all AI-related data risks</option>
+        <option value="Moderate" selected>Moderate &mdash; Balance innovation with protection</option>
+        <option value="Progressive">Progressive &mdash; Embrace AI with reasonable safeguards</option>
+      </select>
+      <label for="additionalNotes">Additional Requirements or Notes</label>
+      <textarea id="additionalNotes" placeholder="Any specific requirements, exceptions, or considerations..."></textarea>
+      <div class="btn-row"><button class="btn btn-secondary" onclick="wizNext(3)">&#x2190; Back</button><button class="btn btn-primary" onclick="generatePolicy()">Generate Policy</button></div>
+    </div>
+
+    <!-- Policy Output -->
+    <div class="policy-output" id="policyOutput"></div>
+
+    <footer>LU2 Topic 3: Ethical AI Data Use Guidelines &mdash; Responsible Generative AI Basics</footer>
+  </div>
+  <script>
+    const TOTAL_STEPS=5;
+    let currentWiz=0;
+
+    function renderProgress(){
+      let html='';
+      for(let i=0;i<TOTAL_STEPS;i++){
+        const cls=i<currentWiz?'done':i===currentWiz?'active':'';
+        html+=`<div class="wizard-dot ${cls}"></div>`;
+      }
+      document.getElementById('wizProgress').innerHTML=html;
+    }
+
+    function wizNext(n){
+      document.getElementById('wiz'+currentWiz).classList.remove('active');
+      currentWiz=n;
+      document.getElementById('wiz'+currentWiz).classList.add('active');
+      document.getElementById('policyOutput').classList.remove('visible');
+      renderProgress();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function getChecked(cls){return [...document.querySelectorAll('.'+cls+':checked')].map(c=>c.value);}
+
+    function generatePolicy(){
+      const org=document.getElementById('orgName').value||'[Organisation Name]';
+      const industry=document.getElementById('industry').value||'[Industry]';
+      const size=document.getElementById('orgSize').value||'[Size]';
+      const tools=document.getElementById('aiTools').value||'[Not specified]';
+      const dataTypes=getChecked('dt');
+      const regs=getChecked('reg');
+      const safeguards=getChecked('sg');
+      const risk=document.getElementById('riskTolerance').value;
+      const notes=document.getElementById('additionalNotes').value;
+      const date=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+      // Data classification
+      const prohibited=['Raw personal health records','Unencrypted financial account numbers','Authentication credentials and passwords','Classified or confidential government documents'];
+      const restricted=dataTypes.length?dataTypes:['General business data'];
+      const permitted=['Publicly available information','Synthetic or test data','Anonymised aggregate statistics','Published research and documentation'];
+
+      let html=`<h2>AI Data Handling Policy</h2><p class="org-name">${org} &mdash; ${industry} | ${size} | Generated: ${date}</p>`;
+
+      html+=`<div class="policy-section"><h3>1. Purpose & Scope</h3><p>This policy establishes guidelines for the ethical and responsible use of data in generative AI tools within ${org}. It applies to all employees, contractors, and third parties who interact with AI systems on behalf of the organisation.</p><p><strong>Approved AI Tools:</strong> ${tools}</p><p><strong>Risk Tolerance:</strong> ${risk}</p></div>`;
+
+      html+=`<div class="policy-section"><h3>2. Data Classification for AI Use</h3>
+        <p><strong>PROHIBITED</strong> &mdash; Never input into AI tools:</p><ul>${prohibited.map(d=>'<li>'+d+'</li>').join('')}</ul>
+        <p style="margin-top:0.8rem;"><strong>RESTRICTED</strong> &mdash; May be used with safeguards only:</p><ul>${restricted.map(d=>'<li>'+d+'</li>').join('')}</ul>
+        <p style="margin-top:0.8rem;"><strong>PERMITTED</strong> &mdash; May be freely used:</p><ul>${permitted.map(d=>'<li>'+d+'</li>').join('')}</ul></div>`;
+
+      html+=`<div class="policy-section"><h3>3. Regulatory Compliance</h3>`;
+      if(regs.length){html+=`<p>This policy is designed to comply with:</p><ul>${regs.map(r=>'<li>'+r+'</li>').join('')}</ul>`;}
+      else{html+=`<p>No specific regulations selected. Organisations should identify and comply with all applicable data protection regulations.</p>`;}
+      html+=`</div>`;
+
+      html+=`<div class="policy-section"><h3>4. Safeguards & Controls</h3>`;
+      if(safeguards.length){html+=`<p>The following safeguards must be implemented:</p><ul>${safeguards.map(s=>'<li>'+s+'</li>').join('')}</ul>`;}
+      else{html+=`<p>No safeguards selected. It is strongly recommended to implement data anonymisation, encryption, access controls, and audit logging at minimum.</p>`;}
+      html+=`</div>`;
+
+      html+=`<div class="policy-section"><h3>5. Employee Responsibilities</h3><ul>
+        <li>All employees must complete AI data handling training before using AI tools</li>
+        <li>Never input prohibited data categories into any AI tool</li>
+        <li>Apply anonymisation techniques to restricted data before AI input</li>
+        <li>Review all AI-generated outputs for accuracy and bias before use</li>
+        <li>Report any suspected data breaches or policy violations immediately</li>
+        <li>Maintain awareness of which data has been shared with AI systems</li></ul></div>`;
+
+      html+=`<div class="policy-section"><h3>6. Incident Response</h3><ul>
+        <li><strong>Detection:</strong> All employees are responsible for identifying potential AI-related data incidents</li>
+        <li><strong>Reporting:</strong> Incidents must be reported to the Data Protection Officer within 24 hours</li>
+        <li><strong>Assessment:</strong> The incident response team will assess severity and scope within 48 hours</li>
+        <li><strong>Notification:</strong> Affected parties and regulators will be notified as required by applicable regulations</li>
+        <li><strong>Remediation:</strong> Corrective actions will be implemented and documented</li>
+        <li><strong>Review:</strong> Post-incident review to update policies and prevent recurrence</li></ul></div>`;
+
+      html+=`<div class="policy-section"><h3>7. Review & Updates</h3><p>This policy will be reviewed quarterly and updated as needed to reflect changes in AI technology, regulations, and organisational requirements. All updates will be communicated to employees and relevant training will be provided.</p>`;
+      if(notes){html+=`<p style="margin-top:0.8rem;"><strong>Additional Notes:</strong> ${notes}</p>`;}
+      html+=`</div>`;
+
+      html+=`<div class="policy-actions"><button class="btn btn-secondary" onclick="window.print()">Print / Save as PDF</button><button class="btn btn-primary" onclick="resetWizard()">Create New Policy</button></div>`;
+
+      document.getElementById('wiz'+currentWiz).classList.remove('active');
+      const out=document.getElementById('policyOutput');
+      out.innerHTML=html;
+      out.classList.add('visible');
+      out.scrollIntoView({behavior:'smooth'});
+    }
+
+    function resetWizard(){
+      document.getElementById('policyOutput').classList.remove('visible');
+      currentWiz=0;
+      document.getElementById('wiz0').classList.add('active');
+      renderProgress();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function toggleTheme(){const h=document.documentElement,c=h.getAttribute('data-theme'),n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('theme',n);updateBtn(n);}
+    function updateBtn(t){document.getElementById('themeIcon').innerHTML=t==='dark'?'&#x2600;&#xFE0F;':'&#x1F319;';document.getElementById('themeLabel').textContent=t==='dark'?'Light':'Dark';}
+    (function(){const s=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',s);updateBtn(s);renderProgress();})();
+  </script>
+</body>
+</html>

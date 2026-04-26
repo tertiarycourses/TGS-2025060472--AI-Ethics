@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Output Scepticism Checker</title>
+  <style>
+    :root,[data-theme="dark"]{--bg:#1a1a2e;--card-bg:#16213e;--border:#3a3a5c;--text:#e0e0e0;--text-muted:#999;--accent:#6c63ff;--accent-light:#8b83ff;--green:#4ade80;--red:#ef4444;--orange:#f59e0b;--shadow:rgba(0,0,0,0.3);--heading-color:#8b83ff;--input-bg:#0f1729;--chip-bg:#1e2a45;--meter-bg:#0f1729;--meter-low:#ef4444;--meter-med:#f59e0b;--meter-high:#4ade80;}
+    [data-theme="light"]{--bg:#f5f0e8;--card-bg:#fffdf7;--border:#c4b99a;--text:#2c2c2c;--text-muted:#666;--accent:#4f46e5;--accent-light:#6366f1;--green:#16a34a;--red:#dc2626;--orange:#d97706;--shadow:rgba(0,0,0,0.08);--heading-color:#4f46e5;--input-bg:#fff;--chip-bg:#fff;--meter-bg:#e5e7eb;--meter-low:#dc2626;--meter-med:#d97706;--meter-high:#16a34a;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Georgia','Times New Roman',serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    .container{max-width:900px;margin:0 auto;padding:2rem;}
+    header{text-align:center;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:2px solid var(--border);}
+    header h1{font-size:2rem;margin-bottom:0.5rem;}
+    header p{color:var(--text-muted);max-width:600px;margin:0 auto;line-height:1.6;}
+    .theme-toggle{position:fixed;top:1.2rem;right:1.5rem;z-index:100;background:var(--card-bg);border:1px solid var(--border);border-radius:50px;padding:0.5rem 0.9rem;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;gap:0.4rem;}
+    .theme-toggle:hover{border-color:var(--accent);}
+    .theme-toggle .label{font-size:0.75rem;font-family:Georgia,serif;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+    .nav-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+    .nav-bar a{color:var(--accent);text-decoration:none;font-size:0.9rem;}
+    .nav-bar a:hover{text-decoration:underline;}
+
+    .input-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1.8rem;margin-bottom:1.5rem;}
+    .input-card h2{font-size:1.2rem;margin-bottom:0.8rem;color:var(--heading-color);}
+    .input-card p{color:var(--text-muted);font-size:0.9rem;line-height:1.6;margin-bottom:1rem;}
+    .input-card textarea{width:100%;padding:1rem;border:1px solid var(--border);border-radius:8px;font-family:Georgia,serif;font-size:0.95rem;background:var(--input-bg);color:var(--text);resize:vertical;min-height:150px;margin-bottom:1rem;}
+    .input-card textarea:focus{outline:none;border-color:var(--accent);}
+
+    .sample-chips{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;}
+    .sample-chip{background:var(--chip-bg);border:1px solid var(--border);border-radius:20px;padding:0.4rem 0.8rem;font-size:0.8rem;font-family:Georgia,serif;color:var(--text);cursor:pointer;transition:all 0.15s;}
+    .sample-chip:hover{border-color:var(--accent);}
+
+    .checklist-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1.8rem;margin-bottom:1.5rem;display:none;}
+    .checklist-card.visible{display:block;}
+    .checklist-card h2{font-size:1.2rem;margin-bottom:0.8rem;color:var(--heading-color);}
+
+    .check-category{margin-bottom:1.5rem;}
+    .check-category h3{font-size:1rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem;}
+    .check-category h3 .cat-icon{font-size:1.2rem;}
+    .check-items{display:flex;flex-direction:column;gap:0.5rem;}
+    .check-item{display:flex;align-items:flex-start;gap:0.6rem;}
+    .check-item input[type="checkbox"]{margin-top:0.25rem;accent-color:var(--accent);width:18px;height:18px;flex-shrink:0;cursor:pointer;}
+    .check-item label{font-size:0.92rem;line-height:1.5;cursor:pointer;}
+    .check-item select{padding:0.3rem 0.5rem;border:1px solid var(--border);border-radius:6px;background:var(--input-bg);color:var(--text);font-family:Georgia,serif;font-size:0.85rem;margin-left:auto;flex-shrink:0;}
+
+    .score-section{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:2rem;text-align:center;display:none;margin-bottom:1.5rem;}
+    .score-section.visible{display:block;}
+    .score-section h2{font-size:1.3rem;margin-bottom:1.2rem;color:var(--heading-color);}
+    .score-meter{width:100%;max-width:400px;margin:0 auto 1rem;height:24px;background:var(--meter-bg);border-radius:12px;overflow:hidden;position:relative;}
+    .score-fill{height:100%;border-radius:12px;transition:width 0.6s ease,background 0.6s;}
+    .score-label{font-size:2.5rem;font-weight:700;margin-bottom:0.3rem;}
+    .score-desc{font-size:1rem;color:var(--text-muted);margin-bottom:1.5rem;}
+    .recommendations{text-align:left;max-width:600px;margin:0 auto;}
+    .recommendations h3{font-size:1rem;color:var(--accent);margin-bottom:0.6rem;}
+    .recommendations ul{padding-left:1.5rem;}
+    .recommendations li{font-size:0.92rem;line-height:1.6;margin-bottom:0.4rem;}
+
+    .btn{padding:0.7rem 1.5rem;border:none;border-radius:8px;font-family:Georgia,serif;font-size:0.95rem;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:opacity 0.15s;}
+    .btn:hover{opacity:0.9;}
+    .btn-row{display:flex;gap:0.8rem;justify-content:center;margin-top:1.5rem;}
+    footer{text-align:center;padding:2rem 0 1rem;font-size:0.8rem;color:var(--text-muted);border-top:1px solid var(--border);margin-top:2rem;}
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()"><span id="themeIcon">&#x2600;&#xFE0F;</span><span class="label" id="themeLabel">Light</span></button>
+  <div class="container">
+    <header>
+      <h1>AI Output Scepticism Checker</h1>
+      <p>Paste AI-generated text and evaluate it against a structured checklist. Build the habit of critically examining every AI output.</p>
+    </header>
+    <div class="nav-bar">
+      <a href="../../hub/">&#x2190; Back to Course Hub</a>
+    </div>
+
+    <div class="input-card">
+      <h2>Paste AI-Generated Text</h2>
+      <p>Enter the AI-generated content you want to evaluate, or load a sample to practise.</p>
+      <div class="sample-chips">
+        <button class="sample-chip" onclick="loadSample(0)">Medical summary</button>
+        <button class="sample-chip" onclick="loadSample(1)">Historical essay</button>
+        <button class="sample-chip" onclick="loadSample(2)">Legal advice</button>
+        <button class="sample-chip" onclick="loadSample(3)">Financial analysis</button>
+      </div>
+      <textarea id="aiText" placeholder="Paste AI-generated text here..."></textarea>
+      <div class="btn-row"><button class="btn" onclick="startEval()">Begin Evaluation</button></div>
+    </div>
+
+    <div class="checklist-card" id="checklist">
+      <h2>Scepticism Evaluation Checklist</h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1.5rem;">Rate each dimension. Check the box if the concern applies, and rate its severity.</p>
+
+      <div class="check-category">
+        <h3><span class="cat-icon">&#x1F50D;</span> Source Verification</h3>
+        <div class="check-items">
+          <div class="check-item"><input type="checkbox" id="c1" onchange="updateScore()"><label for="c1">Contains specific claims that cannot be easily verified</label><select id="s1" onchange="updateScore()"><option value="1">Low</option><option value="2">Medium</option><option value="3" selected>High</option></select></div>
+          <div class="check-item"><input type="checkbox" id="c2" onchange="updateScore()"><label for="c2">References or citations that need independent verification</label><select id="s2" onchange="updateScore()"><option value="1">Low</option><option value="2" selected>Medium</option><option value="3">High</option></select></div>
+          <div class="check-item"><input type="checkbox" id="c3" onchange="updateScore()"><label for="c3">Quotes attributed to specific people or organisations</label><select id="s3" onchange="updateScore()"><option value="1">Low</option><option value="2">Medium</option><option value="3" selected>High</option></select></div>
+        </div>
+      </div>
+
+      <div class="check-category">
+        <h3><span class="cat-icon">&#x1F9E9;</span> Logical Consistency</h3>
+        <div class="check-items">
+          <div class="check-item"><input type="checkbox" id="c4" onchange="updateScore()"><label for="c4">Contains internal contradictions or inconsistencies</label><select id="s4" onchange="updateScore()"><option value="1">Low</option><option value="2" selected>Medium</option><option value="3">High</option></select></div>
+          <div class="check-item"><input type="checkbox" id="c5" onchange="updateScore()"><label for="c5">Makes logical leaps without supporting evidence</label><select id="s5" onchange="updateScore()"><option value="1">Low</option><option value="2" selected>Medium</option><option value="3">High</option></select></div>
+          <div class="check-item"><input type="checkbox" id="c6" onchange="updateScore()"><label for="c6">Conclusions don't follow from the premises presented</label><select id="s6" onchange="updateScore()"><option value="1">Low</option><option value="2">Medium</option><option value="3" selected>High</option></select></div>
+        </div>
+      </div>
+
+      <div class="check-category">
+        <h3><span class="cat-icon">&#x2696;&#xFE0F;</span> Bias Detection</h3>
+        <div class="check-items">
+          <div class="check-item"><input type="checkbox" id="c7" onchange="updateScore()"><label for="c7">Presents only one perspective without acknowledging others</label><select id="s7" onchange="updateScore()"><option value="1">Low</option><option value="2" selected>Medium</option><option value="3">High</option></select></div>
+          <div class="check-item"><input type="checkbox" id="c8" onchange="updateScore()"><label for="c8">Contains stereotypes or generalisations about groups</label><select id="s8" onchange="updateScore()"><option value="1">Low</option><option value="2">Medium</option><option value="3" selected>High</option></select></div>
+          <div class="check-item"><input type="checkbox" id="c9" onchange="updateScore()"><label for="c9">Uses emotionally charged or persuasive language inappropriately</label><select id="s9" onchange="updateScore()"><option value="1">Low</option><option value="2" selected>Medium</option><option value="3">High</option></select></div>
+        </div>
+      </div>
+
+      <div class="check-category">
+        <h3><span class="cat-icon">&#x2705;</span> Factual Accuracy</h3>
+        <div class="check-items">
+          <div class="check-item"><input type="checkbox" id="c10" onchange="updateScore()"><label for="c10">Contains specific statistics, dates, or numbers that may be fabricated</label><select id="s10" onchange="updateScore()"><option value="1">Low</option><option value="2">Medium</option><option value="3" selected>High</option></select></div>
+          <div class="check-item"><input type="checkbox" id="c11" onchange="updateScore()"><label for="c11">Names specific people, organisations, or events that need verification</label><select id="s11" onchange="updateScore()"><option value="1">Low</option><option value="2" selected>Medium</option><option value="3">High</option></select></div>
+          <div class="check-item"><input type="checkbox" id="c12" onchange="updateScore()"><label for="c12">Makes claims about current events or recent developments</label><select id="s12" onchange="updateScore()"><option value="1">Low</option><option value="2" selected>Medium</option><option value="3">High</option></select></div>
+        </div>
+      </div>
+
+      <div class="check-category">
+        <h3><span class="cat-icon">&#x1F4CB;</span> Completeness</h3>
+        <div class="check-items">
+          <div class="check-item"><input type="checkbox" id="c13" onchange="updateScore()"><label for="c13">Appears to omit important considerations or counterarguments</label><select id="s13" onchange="updateScore()"><option value="1">Low</option><option value="2" selected>Medium</option><option value="3">High</option></select></div>
+          <div class="check-item"><input type="checkbox" id="c14" onchange="updateScore()"><label for="c14">Oversimplifies a complex topic</label><select id="s14" onchange="updateScore()"><option value="1" selected>Low</option><option value="2">Medium</option><option value="3">High</option></select></div>
+        </div>
+      </div>
+
+      <div class="check-category">
+        <h3><span class="cat-icon">&#x1F3AF;</span> Appropriateness</h3>
+        <div class="check-items">
+          <div class="check-item"><input type="checkbox" id="c15" onchange="updateScore()"><label for="c15">Tone or style is not appropriate for the intended audience</label><select id="s15" onchange="updateScore()"><option value="1" selected>Low</option><option value="2">Medium</option><option value="3">High</option></select></div>
+          <div class="check-item"><input type="checkbox" id="c16" onchange="updateScore()"><label for="c16">Content could cause harm if used without modification</label><select id="s16" onchange="updateScore()"><option value="1">Low</option><option value="2">Medium</option><option value="3" selected>High</option></select></div>
+        </div>
+      </div>
+
+      <div class="btn-row"><button class="btn" onclick="showScore()">Calculate Scepticism Score</button></div>
+    </div>
+
+    <div class="score-section" id="scoreSection">
+      <h2>Scepticism Assessment</h2>
+      <div class="score-meter"><div class="score-fill" id="scoreFill"></div></div>
+      <div class="score-label" id="scoreLabel">0/100</div>
+      <div class="score-desc" id="scoreDesc"></div>
+      <div class="recommendations" id="recommendations"></div>
+      <div class="btn-row"><button class="btn" onclick="resetAll()">Evaluate New Text</button></div>
+    </div>
+
+    <footer>LU1 Topic 4: Professional Scepticism &mdash; Responsible Generative AI Basics</footer>
+  </div>
+  <script>
+    const SAMPLES=[
+      `According to a 2024 study published in The Lancet, AI diagnostic tools have achieved 99.7% accuracy in detecting early-stage pancreatic cancer, outperforming human radiologists by 34%. Dr. Sarah Chen of the Mayo Clinic stated that "AI will completely replace radiologists within 5 years." The technology uses a proprietary algorithm developed by MedTech Solutions Inc. that analyses over 847 biomarkers simultaneously. Currently, 73% of US hospitals have adopted this technology, resulting in a 45% reduction in cancer-related deaths nationwide.`,
+      `The Battle of Waterloo in 1815 was Napoleon's final defeat, ending his rule as Emperor of France. The battle took place near Waterloo in present-day Belgium. Napoleon commanded approximately 72,000 troops against the Duke of Wellington's combined force of 118,000 Allied soldiers. The battle lasted from dawn until late evening, with Napoleon's Imperial Guard making their famous last stand at 7:30 PM. Historians generally agree that Napoleon's decision to delay the battle by three hours due to wet ground was the single most decisive factor in his defeat, as it allowed Prussian reinforcements under Field Marshal Blücher to arrive from Wavre.`,
+      `Under the General Data Protection Regulation (GDPR), companies that experience a data breach must notify the relevant supervisory authority within 72 hours of becoming aware of the breach. Failure to comply can result in fines of up to €20 million or 4% of annual global turnover, whichever is higher. Additionally, under the California Consumer Privacy Act (CCPA), all US companies must provide consumers with the right to delete their personal data within 30 days of a request. The recent landmark case of Smith v. TechCorp (2023) established that AI-generated content is not protected under copyright law in any jurisdiction.`,
+      `Based on current market trends, Bitcoin is projected to reach $250,000 by Q3 2025, according to analysts at Goldman Sachs. The cryptocurrency market has grown by 340% year-over-year, with institutional adoption increasing by 67%. Major banks including JP Morgan, Bank of America, and HSBC have all announced plans to offer Bitcoin ETFs to retail customers. The S&P 500's correlation with Bitcoin has reached 0.89, the highest in history, suggesting traditional markets are now closely tied to crypto performance.`
+    ];
+
+    function loadSample(i){document.getElementById('aiText').value=SAMPLES[i];}
+
+    function startEval(){
+      if(!document.getElementById('aiText').value.trim()){alert('Please paste some AI-generated text first.');return;}
+      document.getElementById('checklist').classList.add('visible');
+      document.getElementById('checklist').scrollIntoView({behavior:'smooth'});
+    }
+
+    function updateScore(){}
+
+    function showScore(){
+      let totalIssues=0,totalSeverity=0,maxSeverity=0;
+      for(let i=1;i<=16;i++){
+        const cb=document.getElementById('c'+i);
+        const sv=document.getElementById('s'+i);
+        if(cb&&cb.checked){
+          totalIssues++;
+          totalSeverity+=parseInt(sv.value);
+          maxSeverity+=3;
+        }else if(cb){
+          maxSeverity+=3;
+        }
+      }
+      // Score: higher = more skeptical review needed (more issues found)
+      // Invert: 100 = text is highly trustworthy (no issues), 0 = text needs major verification
+      const rawScore=maxSeverity>0?Math.round((1-totalSeverity/48)*100):100;
+      const score=Math.max(0,Math.min(100,rawScore));
+
+      const fill=document.getElementById('scoreFill');
+      fill.style.width=score+'%';
+      fill.style.background=score>=70?'var(--meter-high)':score>=40?'var(--meter-med)':'var(--meter-low)';
+
+      document.getElementById('scoreLabel').textContent=score+'/100';
+
+      let desc='',recs=[];
+      if(score>=80){
+        desc='Low Risk — The text appears relatively reliable, but always verify key claims.';
+        recs=['Verify any specific statistics or quotes against primary sources','Consider whether any important perspectives are missing','Cross-reference with at least one independent source before publishing'];
+      }else if(score>=50){
+        desc='Moderate Risk — Several potential issues detected. Careful verification recommended.';
+        recs=['Do not use this content without thorough fact-checking','Verify all named sources, quotes, and statistics independently','Check for logical consistency and potential bias','Consider consulting domain experts before relying on this content','Look for alternative sources that corroborate the key claims'];
+      }else{
+        desc='High Risk — Significant concerns identified. This content requires extensive verification before any use.';
+        recs=['Do NOT use or share this content without comprehensive fact-checking','Independently verify every factual claim, statistic, and quote','Be especially wary of specific numbers, dates, and attributed quotes','Check whether the named experts, organisations, and studies actually exist','Consider that this content may contain AI hallucinations','Consult authoritative sources in the relevant domain','Have a subject matter expert review the content'];
+      }
+
+      document.getElementById('scoreDesc').textContent=desc;
+      const recsHtml=`<h3>Recommendations</h3><ul>${recs.map(r=>'<li>'+r+'</li>').join('')}</ul>`;
+      document.getElementById('recommendations').innerHTML=recsHtml;
+      document.getElementById('scoreSection').classList.add('visible');
+      document.getElementById('scoreSection').scrollIntoView({behavior:'smooth'});
+    }
+
+    function resetAll(){
+      document.getElementById('aiText').value='';
+      for(let i=1;i<=16;i++){const cb=document.getElementById('c'+i);if(cb)cb.checked=false;}
+      document.getElementById('checklist').classList.remove('visible');
+      document.getElementById('scoreSection').classList.remove('visible');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function toggleTheme(){const h=document.documentElement,c=h.getAttribute('data-theme'),n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('theme',n);updateBtn(n);}
+    function updateBtn(t){document.getElementById('themeIcon').innerHTML=t==='dark'?'&#x2600;&#xFE0F;':'&#x1F319;';document.getElementById('themeLabel').textContent=t==='dark'?'Light':'Dark';}
+    (function(){const s=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',s);updateBtn(s);})();
+  </script>
+</body>
+</html>

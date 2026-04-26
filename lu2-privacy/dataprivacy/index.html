@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Anonymization Techniques Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Data Anonymization Techniques</h1>
+        <p class="subtitle">Interactive demo of the anonymization spectrum &mdash; from deidentification to subjective anonymization</p>
+    </header>
+
+    <main>
+        <!-- API Key & Controls -->
+        <section class="controls-panel">
+            <div class="api-key-group">
+                <label for="apiKey">Google Gemini API Key</label>
+                <div class="input-row">
+                    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off">
+                    <button id="toggleKey" title="Show/hide key">&#x1f441;</button>
+                </div>
+            </div>
+            <div class="actions">
+                <button id="generateBtn" class="btn-primary">Generate Sample Data</button>
+                <button id="anonymizeBtn" class="btn-secondary" disabled>Apply All Techniques</button>
+            </div>
+            <div id="statusBar" class="status-bar"></div>
+        </section>
+
+        <!-- Original Data -->
+        <section id="originalSection" class="data-section hidden">
+            <h2>Original Sample Data</h2>
+            <p class="section-desc">AI-generated realistic personal records used as input for each technique.</p>
+            <div id="originalData" class="data-table-wrap"></div>
+        </section>
+
+        <!-- Technique Cards -->
+        <div class="techniques-grid">
+            <!-- Deidentification -->
+            <section class="technique-card" data-technique="deidentification">
+                <div class="card-header deident">
+                    <h2>Deidentification</h2>
+                    <span class="risk-badge high">High Re-ID Risk</span>
+                </div>
+                <div class="card-meta">
+                    <p><strong>Definition:</strong> Altering/removing direct identifiers (name, SSN, email) but quasi-identifiers remain.</p>
+                    <p><strong>Regulatory:</strong> Still falls under GDPR &mdash; not considered anonymous.</p>
+                    <p><strong>AI Training:</strong> Dangerous &mdash; quasi-identifiers enable re-identification.</p>
+                </div>
+                <div class="card-body">
+                    <div id="deidentResult" class="result-area">
+                        <span class="placeholder">Generate data &amp; apply techniques to see results</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pseudonymization -->
+            <section class="technique-card" data-technique="pseudonymization">
+                <div class="card-header pseudo">
+                    <h2>Pseudonymization</h2>
+                    <span class="risk-badge moderate">Moderate Risk</span>
+                </div>
+                <div class="card-meta">
+                    <p><strong>Definition:</strong> Replacing identifiers with artificial keys.</p>
+                    <p><strong>Regulatory:</strong> Supports security, not anonymity.</p>
+                    <p><strong>AI Training:</strong> Conditional.</p>
+                </div>
+                <div class="card-body">
+                    <div id="pseudoResult" class="result-area">
+                        <span class="placeholder">Generate data &amp; apply techniques to see results</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Objective Anonymization -->
+            <section class="technique-card" data-technique="objective">
+                <div class="card-header objective">
+                    <h2>Objective Anonymization</h2>
+                    <span class="risk-badge zero">Zero Risk</span>
+                </div>
+                <div class="card-meta">
+                    <p><strong>Definition:</strong> Irreversibly stripped data.</p>
+                    <p><strong>Regulatory:</strong> The gold standard.</p>
+                    <p><strong>AI Training:</strong> Increasingly impossible.</p>
+                </div>
+                <div class="card-body">
+                    <div id="objectiveResult" class="result-area">
+                        <span class="placeholder">Generate data &amp; apply techniques to see results</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Subjective Anonymization -->
+            <section class="technique-card" data-technique="subjective">
+                <div class="card-header subjective">
+                    <h2>Subjective Anonymization</h2>
+                    <span class="risk-badge context">Context-Dependent</span>
+                </div>
+                <div class="card-meta">
+                    <p><strong>Definition:</strong> Different reviewers make different judgment calls on what to remove &mdash; no fixed standard.</p>
+                    <p><strong>Regulatory:</strong> The new paradigm &mdash; context-driven rather than rule-driven.</p>
+                    <p><strong>AI Training:</strong> Highly viable, but consistency depends on reviewer expertise.</p>
+                </div>
+                <div class="card-body">
+                    <div id="subjectiveResult" class="result-area">
+                        <span class="placeholder">Generate data &amp; apply techniques to see results</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Comparison Table -->
+        <section id="comparisonSection" class="comparison-section hidden">
+            <h2>Side-by-Side Comparison</h2>
+            <div id="comparisonTable" class="comparison-wrap"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Educational demo &mdash; no data is stored or transmitted beyond the Google Gemini API call.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explainable AI (XAI) Explorer</title>
+  <style>
+    :root,[data-theme="dark"]{--bg:#1a1a2e;--card-bg:#16213e;--border:#3a3a5c;--text:#e0e0e0;--text-muted:#999;--accent:#f59e0b;--accent-light:#fbbf24;--green:#4ade80;--red:#ef4444;--blue:#60a5fa;--purple:#a78bfa;--cyan:#22d3ee;--shadow:rgba(0,0,0,0.3);--heading-color:#fbbf24;--input-bg:#0f1729;--chip-bg:#1e2a45;--canvas-bg:#0f1729;--pos:#4ade80;--neg:#ef4444;}
+    [data-theme="light"]{--bg:#f5f0e8;--card-bg:#fffdf7;--border:#c4b99a;--text:#2c2c2c;--text-muted:#666;--accent:#d97706;--accent-light:#f59e0b;--green:#16a34a;--red:#dc2626;--blue:#2563eb;--purple:#7c3aed;--cyan:#0891b2;--shadow:rgba(0,0,0,0.08);--heading-color:#d97706;--input-bg:#fff;--chip-bg:#fff;--canvas-bg:#f9fafb;--pos:#16a34a;--neg:#dc2626;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Georgia','Times New Roman',serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    .container{max-width:1100px;margin:0 auto;padding:2rem;}
+    header{text-align:center;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:2px solid var(--border);}
+    header h1{font-size:2rem;margin-bottom:0.5rem;}
+    header p{color:var(--text-muted);max-width:650px;margin:0 auto;line-height:1.6;}
+    .theme-toggle{position:fixed;top:1.2rem;right:1.5rem;z-index:100;background:var(--card-bg);border:1px solid var(--border);border-radius:50px;padding:0.5rem 0.9rem;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;gap:0.4rem;}
+    .theme-toggle:hover{border-color:var(--accent);}
+    .theme-toggle .label{font-size:0.75rem;font-family:Georgia,serif;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+    .nav-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+    .nav-bar a{color:var(--accent);text-decoration:none;font-size:0.9rem;}
+    .nav-bar a:hover{text-decoration:underline;}
+
+    /* Concept Cards */
+    .concepts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.5rem;}
+    @media(max-width:700px){.concepts-grid{grid-template-columns:1fr;}}
+    .concept-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1.5rem;position:relative;}
+    .concept-card h3{font-size:1.1rem;margin-bottom:0.3rem;display:flex;align-items:center;gap:0.5rem;}
+    .concept-card .badge{padding:0.15rem 0.5rem;border-radius:10px;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#fff;}
+    .badge-lime{background:#16a34a;}
+    .badge-shap{background:#7c3aed;}
+    .concept-card .subtitle{font-size:0.85rem;color:var(--accent);font-style:italic;margin-bottom:0.6rem;}
+    .concept-card p{font-size:0.88rem;line-height:1.6;color:var(--text-muted);}
+    .concept-card strong{color:var(--text);}
+
+    /* Main Activity */
+    .activity-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1.8rem;margin-bottom:1.5rem;}
+    .activity-card h2{font-size:1.3rem;color:var(--heading-color);margin-bottom:0.5rem;}
+    .activity-card .desc{color:var(--text-muted);font-size:0.9rem;line-height:1.6;margin-bottom:1.2rem;}
+
+    /* Applicant Controls */
+    .applicant-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;}
+    .feature-control{background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;}
+    .feature-control label{display:block;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem;}
+    .feature-control input[type="range"]{width:100%;accent-color:var(--accent);margin-bottom:0.3rem;}
+    .feature-control .feat-val{font-size:1rem;font-weight:700;color:var(--accent);text-align:center;}
+
+    /* Prediction */
+    .prediction-bar{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+    .pred-box{flex:1;min-width:180px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center;}
+    .pred-box .pred-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:0.3rem;}
+    .pred-box .pred-value{font-size:1.8rem;font-weight:700;}
+    .pred-approved{color:var(--green);}
+    .pred-denied{color:var(--red);}
+    .pred-score{color:var(--accent);}
+    .pred-confidence{color:var(--blue);}
+
+    /* Explanation Tabs */
+    .explain-tabs{display:flex;gap:0.5rem;margin-bottom:1rem;}
+    .explain-tab{padding:0.6rem 1.2rem;background:var(--chip-bg);border:2px solid var(--border);border-radius:8px;font-family:Georgia,serif;font-size:0.9rem;color:var(--text);cursor:pointer;transition:all 0.15s;}
+    .explain-tab:hover{border-color:var(--accent);}
+    .explain-tab.active{border-color:var(--accent);background:var(--accent);color:#fff;}
+
+    .explain-panel{display:none;margin-bottom:1.5rem;}
+    .explain-panel.active{display:block;}
+    .explain-panel h3{font-size:1.1rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;}
+    .explain-panel .method-desc{font-size:0.88rem;color:var(--text-muted);line-height:1.6;margin-bottom:1rem;padding:0.8rem;background:var(--input-bg);border-radius:8px;border-left:3px solid var(--accent);}
+
+    /* Feature Importance Bars */
+    .importance-chart{margin:1rem 0;}
+    .imp-row{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem;}
+    .imp-label{font-size:0.85rem;min-width:120px;text-align:right;font-weight:700;}
+    .imp-bar-container{flex:1;height:28px;position:relative;display:flex;align-items:center;}
+    .imp-bar-bg{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--input-bg);border-radius:4px;}
+    .imp-bar-center{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--border);z-index:1;}
+    .imp-bar{position:absolute;top:3px;bottom:3px;border-radius:3px;z-index:2;transition:width 0.4s,left 0.4s;}
+    .imp-bar.positive{background:var(--pos);}
+    .imp-bar.negative{background:var(--neg);}
+    .imp-value{font-size:0.8rem;font-weight:700;min-width:55px;text-align:left;padding-left:0.3rem;}
+    .imp-value.pos-val{color:var(--pos);}
+    .imp-value.neg-val{color:var(--neg);}
+
+    /* Comparison */
+    .comparison-section{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1.8rem;margin-bottom:1.5rem;}
+    .comparison-section h2{font-size:1.2rem;color:var(--heading-color);margin-bottom:1rem;text-align:center;}
+    .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    @media(max-width:700px){.comp-grid{grid-template-columns:1fr;}}
+    .comp-col h4{text-align:center;margin-bottom:0.8rem;font-size:1rem;}
+    .comp-col .badge{display:inline-block;}
+
+    /* Comparison Table */
+    .comp-table{width:100%;border-collapse:collapse;margin-top:1rem;font-size:0.85rem;}
+    .comp-table th,.comp-table td{padding:0.6rem 0.8rem;border:1px solid var(--border);text-align:left;}
+    .comp-table th{background:var(--chip-bg);color:var(--heading-color);text-align:center;}
+    .comp-table td:first-child{font-weight:700;}
+
+    .btn{padding:0.7rem 1.5rem;border:none;border-radius:8px;font-family:Georgia,serif;font-size:0.95rem;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:opacity 0.15s;}
+    .btn:hover{opacity:0.9;}
+    .btn-row{display:flex;gap:0.8rem;margin-bottom:1rem;}
+
+    .scenario-chips{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;}
+    .scenario-chip{background:var(--chip-bg);border:1px solid var(--border);border-radius:20px;padding:0.4rem 0.8rem;font-size:0.8rem;font-family:Georgia,serif;color:var(--text);cursor:pointer;transition:all 0.15s;}
+    .scenario-chip:hover{border-color:var(--accent);background:var(--accent);color:#fff;}
+
+    footer{text-align:center;padding:2rem 0 1rem;font-size:0.8rem;color:var(--text-muted);border-top:1px solid var(--border);margin-top:2rem;}
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()"><span id="themeIcon">&#x2600;&#xFE0F;</span><span class="label" id="themeLabel">Light</span></button>
+  <div class="container">
+    <header>
+      <h1>Explainable AI (XAI) Explorer</h1>
+      <p>Understand how LIME and SHAP explain AI decisions. Adjust applicant features, see predictions change, and compare explanation methods side by side.</p>
+    </header>
+    <div class="nav-bar"><a href="../../hub/">&#x2190; Back to Course Hub</a></div>
+
+    <!-- Concept Overview -->
+    <div class="concepts-grid">
+      <div class="concept-card">
+        <h3><span class="badge badge-lime">LIME</span> Local Interpretable Model-agnostic Explanations</h3>
+        <p class="subtitle">Approximates complex models locally</p>
+        <p><strong>How it works:</strong> LIME perturbs the input data, observes changes in the prediction, and fits a simple linear model to explain that specific, local decision. Think of it as putting a magnifying glass on a single prediction to understand what drove it.</p>
+      </div>
+      <div class="concept-card">
+        <h3><span class="badge badge-shap">SHAP</span> SHapley Additive exPlanations</h3>
+        <p class="subtitle">Based on cooperative game theory</p>
+        <p><strong>How it works:</strong> SHAP assigns each feature a unified importance value for a prediction. It calculates exactly which features (e.g., age, income) drove the decision based on marginal contributions, providing both magnitude and direction of each feature's influence.</p>
+      </div>
+    </div>
+
+    <!-- Main Activity -->
+    <div class="activity-card">
+      <h2>Loan Approval Model Simulator</h2>
+      <p class="desc">Adjust the applicant's features below to see how the model's prediction changes, then explore how LIME and SHAP explain the decision differently.</p>
+
+      <div class="scenario-chips">
+        <button class="scenario-chip" onclick="loadScenario('ideal')">Ideal Applicant</button>
+        <button class="scenario-chip" onclick="loadScenario('risky')">Risky Applicant</button>
+        <button class="scenario-chip" onclick="loadScenario('borderline')">Borderline Case</button>
+        <button class="scenario-chip" onclick="loadScenario('young')">Young Professional</button>
+        <button class="scenario-chip" onclick="loadScenario('retired')">Retiree</button>
+      </div>
+
+      <div class="applicant-grid">
+        <div class="feature-control">
+          <label for="f_age">Age</label>
+          <input type="range" id="f_age" min="18" max="75" value="35" oninput="updateModel()">
+          <div class="feat-val" id="v_age">35</div>
+        </div>
+        <div class="feature-control">
+          <label for="f_income">Annual Income ($K)</label>
+          <input type="range" id="f_income" min="15" max="300" value="75" oninput="updateModel()">
+          <div class="feat-val" id="v_income">$75K</div>
+        </div>
+        <div class="feature-control">
+          <label for="f_credit">Credit Score</label>
+          <input type="range" id="f_credit" min="300" max="850" value="700" oninput="updateModel()">
+          <div class="feat-val" id="v_credit">700</div>
+        </div>
+        <div class="feature-control">
+          <label for="f_debt">Debt-to-Income (%)</label>
+          <input type="range" id="f_debt" min="0" max="80" value="30" oninput="updateModel()">
+          <div class="feat-val" id="v_debt">30%</div>
+        </div>
+        <div class="feature-control">
+          <label for="f_employment">Employment (Years)</label>
+          <input type="range" id="f_employment" min="0" max="40" value="5" oninput="updateModel()">
+          <div class="feat-val" id="v_employment">5</div>
+        </div>
+        <div class="feature-control">
+          <label for="f_history">Credit History (Years)</label>
+          <input type="range" id="f_history" min="0" max="40" value="8" oninput="updateModel()">
+          <div class="feat-val" id="v_history">8</div>
+        </div>
+      </div>
+
+      <!-- Prediction -->
+      <div class="prediction-bar">
+        <div class="pred-box"><div class="pred-label">Decision</div><div class="pred-value" id="predDecision">—</div></div>
+        <div class="pred-box"><div class="pred-label">Approval Score</div><div class="pred-value pred-score" id="predScore">—</div></div>
+        <div class="pred-box"><div class="pred-label">Confidence</div><div class="pred-value pred-confidence" id="predConf">—</div></div>
+        <div class="pred-box"><div class="pred-label">Threshold</div><div class="pred-value" style="color:var(--text-muted);">0.50</div></div>
+      </div>
+    </div>
+
+    <!-- Explanation Panels -->
+    <div class="explain-tabs">
+      <button class="explain-tab active" onclick="switchExplain(0)"><span class="badge badge-lime" style="margin-right:0.3rem;">LIME</span> Explanation</button>
+      <button class="explain-tab" onclick="switchExplain(1)"><span class="badge badge-shap" style="margin-right:0.3rem;">SHAP</span> Explanation</button>
+    </div>
+
+    <div class="explain-panel active" id="explainPanel0">
+      <h3><span class="badge badge-lime">LIME</span> Local Explanation</h3>
+      <div class="method-desc">LIME creates local perturbations around this specific applicant, observes how the model responds, and fits a simple interpretable model. The bars show which features pushed the prediction towards approval (green, right) or denial (red, left) <strong>for this specific case</strong>. Values may vary slightly between runs due to the stochastic perturbation process.</div>
+      <div class="btn-row"><button class="btn" onclick="runLIME()">Run LIME Analysis</button></div>
+      <div class="importance-chart" id="limeChart"></div>
+    </div>
+
+    <div class="explain-panel" id="explainPanel1">
+      <h3><span class="badge badge-shap">SHAP</span> Shapley Value Explanation</h3>
+      <div class="method-desc">SHAP computes each feature's marginal contribution using Shapley values from game theory. The bars show the exact contribution of each feature to the final prediction score (positive = towards approval, negative = towards denial). SHAP values are <strong>additive</strong>: the base value plus all SHAP values equals the prediction score.</div>
+      <div class="btn-row"><button class="btn" onclick="runSHAP()">Run SHAP Analysis</button></div>
+      <div class="importance-chart" id="shapChart"></div>
+      <div id="shapFormula" style="font-size:0.85rem;color:var(--text-muted);margin-top:0.5rem;padding:0.8rem;background:var(--input-bg);border-radius:8px;display:none;"></div>
+    </div>
+
+    <!-- Side-by-side Comparison -->
+    <div class="comparison-section">
+      <h2>LIME vs SHAP — Side by Side</h2>
+      <div class="comp-grid">
+        <div class="comp-col">
+          <h4><span class="badge badge-lime">LIME</span> Feature Importance</h4>
+          <div id="limeCompChart"></div>
+        </div>
+        <div class="comp-col">
+          <h4><span class="badge badge-shap">SHAP</span> Feature Importance</h4>
+          <div id="shapCompChart"></div>
+        </div>
+      </div>
+
+      <table class="comp-table">
+        <thead><tr><th>Aspect</th><th><span class="badge badge-lime">LIME</span></th><th><span class="badge badge-shap">SHAP</span></th></tr></thead>
+        <tbody>
+          <tr><td>Approach</td><td>Local surrogate model (perturbation-based)</td><td>Game-theoretic (Shapley values)</td></tr>
+          <tr><td>Scope</td><td>Local only (per-prediction)</td><td>Both local and global</td></tr>
+          <tr><td>Consistency</td><td>Can vary between runs (stochastic)</td><td>Deterministic, unique solution</td></tr>
+          <tr><td>Additivity</td><td>No — importances are relative weights</td><td>Yes — values sum to prediction</td></tr>
+          <tr><td>Speed</td><td>Fast (fewer perturbations)</td><td>Slower (exponential combinations)</td></tr>
+          <tr><td>Model-agnostic</td><td>Yes</td><td>Yes (KernelSHAP) / No (TreeSHAP)</td></tr>
+          <tr><td>Best for</td><td>Quick local explanations, debugging</td><td>Rigorous analysis, regulatory compliance</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer>LU3 Topic 1: Responsible AI Principles — Explainable AI &mdash; Responsible Generative AI Basics</footer>
+  </div>
+  <script>
+    // ---- Simulated Loan Model ----
+    // Weighted scoring model simulating a complex "black box"
+    const FEATURES=['age','income','credit','debt','employment','history'];
+    const LABELS={age:'Age',income:'Income',credit:'Credit Score',debt:'Debt Ratio',employment:'Employment',history:'Credit History'};
+
+    // Model weights (hidden from the "user" — this is the black box)
+    const W={age:0.08,income:0.25,credit:0.30,debt:-0.20,employment:0.08,history:0.09};
+    const BIAS=-0.15;
+
+    function normalize(f){
+      return{
+        age:(f.age-18)/(75-18),
+        income:(f.income-15)/(300-15),
+        credit:(f.credit-300)/(850-300),
+        debt:f.debt/80,
+        employment:f.employment/40,
+        history:f.history/40
+      };
+    }
+
+    function predict(features){
+      const n=normalize(features);
+      let score=BIAS;
+      for(const k of FEATURES) score+=W[k]*n[k];
+      // Add non-linearity
+      score+=0.05*Math.sin(n.credit*3)*n.income;
+      score-=0.03*n.debt*n.debt;
+      if(n.age<0.15) score-=0.08; // penalty for very young
+      if(n.employment<0.1&&n.income>0.5) score+=0.04; // high-income new worker ok
+      return Math.max(0,Math.min(1,score+0.5));
+    }
+
+    function getFeatures(){
+      return{
+        age:parseInt(document.getElementById('f_age').value),
+        income:parseInt(document.getElementById('f_income').value),
+        credit:parseInt(document.getElementById('f_credit').value),
+        debt:parseInt(document.getElementById('f_debt').value),
+        employment:parseInt(document.getElementById('f_employment').value),
+        history:parseInt(document.getElementById('f_history').value)
+      };
+    }
+
+    function setFeatures(f){
+      for(const k of FEATURES){document.getElementById('f_'+k).value=f[k];}
+      updateModel();
+    }
+
+    const SCENARIOS={
+      ideal:{age:42,income:150,credit:780,debt:15,employment:15,history:20},
+      risky:{age:22,income:30,credit:520,debt:65,employment:1,history:2},
+      borderline:{age:35,income:65,credit:650,debt:40,employment:4,history:7},
+      young:{age:24,income:85,credit:690,debt:25,employment:2,history:3},
+      retired:{age:68,income:45,credit:760,debt:10,employment:0,history:35}
+    };
+
+    function loadScenario(name){setFeatures(SCENARIOS[name]);}
+
+    function updateModel(){
+      const f=getFeatures();
+      document.getElementById('v_age').textContent=f.age;
+      document.getElementById('v_income').textContent='$'+f.income+'K';
+      document.getElementById('v_credit').textContent=f.credit;
+      document.getElementById('v_debt').textContent=f.debt+'%';
+      document.getElementById('v_employment').textContent=f.employment;
+      document.getElementById('v_history').textContent=f.history;
+
+      const score=predict(f);
+      const approved=score>=0.5;
+      const dec=document.getElementById('predDecision');
+      dec.textContent=approved?'Approved':'Denied';
+      dec.className='pred-value '+(approved?'pred-approved':'pred-denied');
+      document.getElementById('predScore').textContent=score.toFixed(3);
+      const conf=Math.abs(score-0.5)*2;
+      document.getElementById('predConf').textContent=(conf*100).toFixed(0)+'%';
+    }
+
+    // ---- LIME Simulation ----
+    function runLIME(){
+      const f=getFeatures();
+      const baseScore=predict(f);
+      const importances={};
+      const N_PERTURB=200;
+
+      for(const k of FEATURES){
+        let totalDelta=0;
+        const range=getRangeForFeature(k);
+        for(let i=0;i<N_PERTURB;i++){
+          const perturbed={...f};
+          // Random perturbation within feature range
+          const noise=(Math.random()-0.5)*range*0.4;
+          perturbed[k]=Math.max(getMin(k),Math.min(getMax(k),f[k]+noise));
+          const newScore=predict(perturbed);
+          totalDelta+=Math.abs(newScore-baseScore)*Math.sign(getDirection(k,f[k]));
+        }
+        importances[k]=totalDelta/N_PERTURB;
+      }
+
+      // Normalize to -1..1 range relative to max
+      const maxAbs=Math.max(...Object.values(importances).map(Math.abs))||1;
+      for(const k of FEATURES) importances[k]/=maxAbs;
+
+      // Add slight stochastic variation (LIME is non-deterministic)
+      for(const k of FEATURES) importances[k]+=(Math.random()-0.5)*0.08;
+
+      renderImportanceBars('limeChart',importances,'LIME');
+      renderImportanceBars('limeCompChart',importances,'LIME');
+    }
+
+    // ---- SHAP Simulation ----
+    function runSHAP(){
+      const f=getFeatures();
+      const baseScore=predict(f);
+
+      // Approximate Shapley values using marginal contributions
+      const baselineF={age:40,income:70,credit:670,debt:35,employment:5,history:8};
+      const baselinePred=predict(baselineF);
+      const shapValues={};
+
+      // For each feature, compute marginal contribution across random coalitions
+      for(const k of FEATURES){
+        let marginalSum=0;
+        const N_SAMPLES=300;
+        for(let i=0;i<N_SAMPLES;i++){
+          // Random coalition: subset of other features
+          const withFeature={...baselineF};
+          const withoutFeature={...baselineF};
+          for(const j of FEATURES){
+            if(j===k) continue;
+            if(Math.random()>0.5){
+              withFeature[j]=f[j];
+              withoutFeature[j]=f[j];
+            }
+          }
+          withFeature[k]=f[k];
+          withoutFeature[k]=baselineF[k];
+          marginalSum+=(predict(withFeature)-predict(withoutFeature));
+        }
+        shapValues[k]=marginalSum/N_SAMPLES;
+      }
+
+      renderImportanceBars('shapChart',shapValues,'SHAP');
+      renderImportanceBars('shapCompChart',shapValues,'SHAP');
+
+      // Show formula
+      const formula=document.getElementById('shapFormula');
+      const sumShap=Object.values(shapValues).reduce((a,b)=>a+b,0);
+      let parts=FEATURES.map(k=>`${LABELS[k]}: ${shapValues[k]>=0?'+':''}${shapValues[k].toFixed(3)}`).join(' | ');
+      formula.innerHTML=`<strong>Additivity check:</strong> Base value (${baselinePred.toFixed(3)}) + SHAP sum (${sumShap>=0?'+':''}${sumShap.toFixed(3)}) = ${(baselinePred+sumShap).toFixed(3)} ≈ Prediction (${baseScore.toFixed(3)})<br><small>${parts}</small>`;
+      formula.style.display='block';
+    }
+
+    function getMin(k){return{age:18,income:15,credit:300,debt:0,employment:0,history:0}[k];}
+    function getMax(k){return{age:75,income:300,credit:850,debt:80,employment:40,history:40}[k];}
+    function getRangeForFeature(k){return getMax(k)-getMin(k);}
+
+    function getDirection(k,val){
+      // Positive = feature helps approval at current value
+      const mid=(getMax(k)+getMin(k))/2;
+      if(k==='debt') return val<mid?1:-1; // lower debt is better
+      return val>mid?1:-1; // higher is generally better for others
+    }
+
+    function renderImportanceBars(containerId,values,method){
+      const sorted=FEATURES.map(k=>({key:k,val:values[k]})).sort((a,b)=>Math.abs(b.val)-Math.abs(a.val));
+      const maxAbs=Math.max(...sorted.map(s=>Math.abs(s.val)))||1;
+
+      let html='';
+      sorted.forEach(s=>{
+        const isPos=s.val>=0;
+        const pct=Math.abs(s.val)/maxAbs*45; // max 45% of width from center
+        const valDisplay=method==='SHAP'?(s.val>=0?'+':'')+s.val.toFixed(3):(s.val>=0?'+':'')+s.val.toFixed(2);
+        const barStyle=isPos?`left:50%;width:${pct}%;`:`left:${50-pct}%;width:${pct}%;`;
+        const barClass=isPos?'positive':'negative';
+        const valClass=isPos?'pos-val':'neg-val';
+
+        html+=`<div class="imp-row">
+          <div class="imp-label">${LABELS[s.key]}</div>
+          <div class="imp-bar-container">
+            <div class="imp-bar-bg"></div>
+            <div class="imp-bar-center"></div>
+            <div class="imp-bar ${barClass}" style="${barStyle}"></div>
+          </div>
+          <div class="imp-value ${valClass}">${valDisplay}</div>
+        </div>`;
+      });
+      document.getElementById(containerId).innerHTML=html;
+    }
+
+    // ---- Tab switching ----
+    function switchExplain(n){
+      document.querySelectorAll('.explain-panel').forEach((p,i)=>p.classList.toggle('active',i===n));
+      document.querySelectorAll('.explain-tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+    }
+
+    // ---- Theme ----
+    function toggleTheme(){const h=document.documentElement,c=h.getAttribute('data-theme'),n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('theme',n);updateBtn(n);}
+    function updateBtn(t){document.getElementById('themeIcon').innerHTML=t==='dark'?'&#x2600;&#xFE0F;':'&#x1F319;';document.getElementById('themeLabel').textContent=t==='dark'?'Light':'Dark';}
+    (function(){
+      const s=localStorage.getItem('theme')||'dark';
+      document.documentElement.setAttribute('data-theme',s);
+      updateBtn(s);
+      updateModel();
+      // Auto-run both analyses
+      setTimeout(()=>{runLIME();runSHAP();},100);
+    })();
+  </script>
+</body>
+</html>

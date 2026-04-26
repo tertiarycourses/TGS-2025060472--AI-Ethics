@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ethical Decision-Making Framework</title>
+  <style>
+    :root,[data-theme="dark"]{--bg:#1a1a2e;--card-bg:#16213e;--border:#3a3a5c;--text:#e0e0e0;--text-muted:#999;--accent:#6c63ff;--accent-light:#8b83ff;--green:#4ade80;--shadow:rgba(0,0,0,0.3);--heading-color:#8b83ff;--input-bg:#0f1729;--chip-bg:#1e2a45;--chip-hover:#2a3a5c;--step-inactive:#3a3a5c;--step-active:#6c63ff;}
+    [data-theme="light"]{--bg:#f5f0e8;--card-bg:#fffdf7;--border:#c4b99a;--text:#2c2c2c;--text-muted:#666;--accent:#4f46e5;--accent-light:#6366f1;--green:#16a34a;--shadow:rgba(0,0,0,0.08);--heading-color:#4f46e5;--input-bg:#fff;--chip-bg:#fff;--chip-hover:#f0ebe0;--step-inactive:#c4b99a;--step-active:#4f46e5;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Georgia','Times New Roman',serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    .container{max-width:900px;margin:0 auto;padding:2rem;}
+    header{text-align:center;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:2px solid var(--border);}
+    header h1{font-size:2rem;margin-bottom:0.5rem;}
+    header p{color:var(--text-muted);max-width:600px;margin:0 auto;line-height:1.6;}
+    .theme-toggle{position:fixed;top:1.2rem;right:1.5rem;z-index:100;background:var(--card-bg);border:1px solid var(--border);border-radius:50px;padding:0.5rem 0.9rem;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;gap:0.4rem;}
+    .theme-toggle:hover{border-color:var(--accent);}
+    .theme-toggle .label{font-size:0.75rem;font-family:Georgia,serif;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+    .nav-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+    .nav-bar a{color:var(--accent);text-decoration:none;font-size:0.9rem;}
+    .nav-bar a:hover{text-decoration:underline;}
+
+    /* Stepper */
+    .stepper{display:flex;justify-content:space-between;margin-bottom:2rem;position:relative;}
+    .stepper::before{content:'';position:absolute;top:15px;left:5%;right:5%;height:2px;background:var(--border);z-index:0;}
+    .step{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;flex:1;}
+    .step-circle{width:32px;height:32px;border-radius:50%;background:var(--step-inactive);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:#fff;margin-bottom:0.4rem;transition:background 0.3s;}
+    .step.active .step-circle,.step.done .step-circle{background:var(--step-active);}
+    .step-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);text-align:center;max-width:80px;}
+    .step.active .step-label{color:var(--accent);font-weight:700;}
+
+    .step-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:1.8rem;margin-bottom:1.5rem;display:none;}
+    .step-card.active{display:block;}
+    .step-card h2{font-size:1.3rem;margin-bottom:0.4rem;color:var(--heading-color);}
+    .step-card .instruction{color:var(--text-muted);font-size:0.9rem;line-height:1.6;margin-bottom:1.2rem;}
+    .step-card label{display:block;font-size:0.85rem;font-weight:700;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.5px;}
+    .step-card textarea,.step-card input[type="text"]{width:100%;padding:0.8rem 1rem;border:1px solid var(--border);border-radius:8px;font-family:Georgia,serif;font-size:0.95rem;background:var(--input-bg);color:var(--text);resize:vertical;min-height:80px;margin-bottom:1rem;}
+    .step-card input[type="text"]{min-height:auto;}
+    .step-card textarea:focus,.step-card input:focus{outline:none;border-color:var(--accent);}
+
+    .sample-scenarios{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.2rem;}
+    .sample-chip{background:var(--chip-bg);border:1px solid var(--border);border-radius:20px;padding:0.4rem 0.8rem;font-size:0.8rem;font-family:Georgia,serif;color:var(--text);cursor:pointer;transition:all 0.15s;}
+    .sample-chip:hover{background:var(--chip-hover);border-color:var(--accent);}
+
+    .checkbox-group{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem;}
+    .checkbox-group label{display:flex;align-items:flex-start;gap:0.6rem;font-size:0.95rem;font-weight:normal;text-transform:none;letter-spacing:0;cursor:pointer;line-height:1.4;}
+    .checkbox-group input[type="checkbox"]{margin-top:0.2rem;accent-color:var(--accent);width:18px;height:18px;flex-shrink:0;}
+
+    .btn-row{display:flex;gap:0.8rem;justify-content:flex-end;margin-top:1rem;}
+    .btn{padding:0.7rem 1.5rem;border:none;border-radius:8px;font-family:Georgia,serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:opacity 0.15s;}
+    .btn-primary{background:var(--accent);color:#fff;}
+    .btn-secondary{background:var(--chip-bg);color:var(--text);border:1px solid var(--border);}
+    .btn:hover{opacity:0.9;}
+    .btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+    /* Summary */
+    .summary{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:2rem;display:none;margin-bottom:1.5rem;}
+    .summary.visible{display:block;}
+    .summary h2{font-size:1.4rem;margin-bottom:1.5rem;color:var(--heading-color);text-align:center;}
+    .summary-section{margin-bottom:1.5rem;}
+    .summary-section h3{font-size:1rem;color:var(--accent);margin-bottom:0.5rem;border-bottom:1px solid var(--border);padding-bottom:0.3rem;}
+    .summary-section p,.summary-section ul{font-size:0.95rem;line-height:1.6;}
+    .summary-section ul{padding-left:1.5rem;}
+    .summary-section li{margin-bottom:0.3rem;}
+    .summary-actions{display:flex;gap:0.8rem;justify-content:center;margin-top:1.5rem;}
+
+    footer{text-align:center;padding:2rem 0 1rem;font-size:0.8rem;color:var(--text-muted);border-top:1px solid var(--border);margin-top:2rem;}
+    @media(max-width:600px){.stepper{gap:0.2rem;}.step-label{font-size:0.55rem;max-width:50px;}}
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()"><span id="themeIcon">&#x2600;&#xFE0F;</span><span class="label" id="themeLabel">Light</span></button>
+  <div class="container">
+    <header>
+      <h1>Ethical Decision-Making Framework</h1>
+      <p>Walk through a structured process to analyse AI ethical scenarios and generate a documented decision.</p>
+    </header>
+    <div class="nav-bar">
+      <a href="../../hub/">&#x2190; Back to Course Hub</a>
+    </div>
+
+    <div class="stepper" id="stepper"></div>
+
+    <!-- Step 1: Scenario -->
+    <div class="step-card active" id="step0">
+      <h2>Step 1: Define the Scenario</h2>
+      <p class="instruction">Describe the AI-related decision or scenario you want to analyse, or select a sample scenario below.</p>
+      <div class="sample-scenarios">
+        <button class="sample-chip" onclick="useSample(0)">AI in hiring decisions</button>
+        <button class="sample-chip" onclick="useSample(1)">AI-generated medical reports</button>
+        <button class="sample-chip" onclick="useSample(2)">Facial recognition in schools</button>
+        <button class="sample-chip" onclick="useSample(3)">AI content moderation</button>
+        <button class="sample-chip" onclick="useSample(4)">Predictive policing</button>
+      </div>
+      <label for="scenario">Scenario Description</label>
+      <textarea id="scenario" placeholder="Describe the AI scenario or decision you want to analyse..."></textarea>
+      <div class="btn-row"><button class="btn btn-primary" onclick="goStep(1)">Next: Stakeholders &#x2192;</button></div>
+    </div>
+
+    <!-- Step 2: Stakeholders -->
+    <div class="step-card" id="step1">
+      <h2>Step 2: Identify Stakeholders</h2>
+      <p class="instruction">List all individuals and groups who could be affected by this decision. Consider direct users, indirect beneficiaries, vulnerable populations, and society at large.</p>
+      <label for="stakeholders">Stakeholders (one per line)</label>
+      <textarea id="stakeholders" placeholder="e.g.&#10;Job applicants&#10;HR department&#10;Current employees&#10;Company shareholders&#10;Regulatory bodies"></textarea>
+      <div class="btn-row"><button class="btn btn-secondary" onclick="goStep(0)">&#x2190; Back</button><button class="btn btn-primary" onclick="goStep(2)">Next: Risks & Benefits &#x2192;</button></div>
+    </div>
+
+    <!-- Step 3: Risks & Benefits -->
+    <div class="step-card" id="step2">
+      <h2>Step 3: Assess Risks & Benefits</h2>
+      <p class="instruction">For the scenario described, identify the potential benefits and risks for each stakeholder group.</p>
+      <label for="benefits">Potential Benefits</label>
+      <textarea id="benefits" placeholder="e.g. Faster processing, reduced costs, consistent decisions..."></textarea>
+      <label for="risks">Potential Risks</label>
+      <textarea id="risks" placeholder="e.g. Algorithmic bias, loss of human oversight, privacy violations..."></textarea>
+      <div class="btn-row"><button class="btn btn-secondary" onclick="goStep(1)">&#x2190; Back</button><button class="btn btn-primary" onclick="goStep(3)">Next: Principles &#x2192;</button></div>
+    </div>
+
+    <!-- Step 4: Ethical Principles -->
+    <div class="step-card" id="step3">
+      <h2>Step 4: Apply Ethical Principles</h2>
+      <p class="instruction">Select which ethical principles are relevant to this scenario and note how they apply.</p>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="p_fairness"> <span><strong>Fairness</strong> &mdash; Does this scenario risk discriminating against any group?</span></label>
+        <label><input type="checkbox" id="p_transparency"> <span><strong>Transparency</strong> &mdash; Can affected parties understand how the AI makes decisions?</span></label>
+        <label><input type="checkbox" id="p_accountability"> <span><strong>Accountability</strong> &mdash; Is it clear who is responsible for the AI's outcomes?</span></label>
+        <label><input type="checkbox" id="p_privacy"> <span><strong>Privacy</strong> &mdash; Does this involve collection or use of personal data?</span></label>
+        <label><input type="checkbox" id="p_beneficence"> <span><strong>Beneficence</strong> &mdash; Do the benefits outweigh the potential harms?</span></label>
+        <label><input type="checkbox" id="p_agency"> <span><strong>Human Agency</strong> &mdash; Do humans retain meaningful control over the decision?</span></label>
+      </div>
+      <label for="principleNotes">Notes on how these principles apply</label>
+      <textarea id="principleNotes" placeholder="Explain how the selected principles are relevant and whether any are in tension..."></textarea>
+      <div class="btn-row"><button class="btn btn-secondary" onclick="goStep(2)">&#x2190; Back</button><button class="btn btn-primary" onclick="goStep(4)">Next: Alternatives &#x2192;</button></div>
+    </div>
+
+    <!-- Step 5: Alternatives -->
+    <div class="step-card" id="step4">
+      <h2>Step 5: Consider Alternatives</h2>
+      <p class="instruction">What alternative approaches could better satisfy the ethical requirements? Think about different technical approaches, safeguards, or process changes.</p>
+      <label for="alternatives">Alternative Approaches</label>
+      <textarea id="alternatives" placeholder="e.g.&#10;1. Add human review for all AI-flagged decisions&#10;2. Use AI as a recommendation tool only, not for final decisions&#10;3. Implement bias auditing before deployment"></textarea>
+      <div class="btn-row"><button class="btn btn-secondary" onclick="goStep(3)">&#x2190; Back</button><button class="btn btn-primary" onclick="goStep(5)">Next: Decision &#x2192;</button></div>
+    </div>
+
+    <!-- Step 6: Decision -->
+    <div class="step-card" id="step5">
+      <h2>Step 6: Make Your Decision</h2>
+      <p class="instruction">Based on your analysis, what is the most ethically sound course of action? Document your reasoning.</p>
+      <label for="decision">Your Decision</label>
+      <textarea id="decision" placeholder="State the decision and explain why it best balances the ethical considerations..."></textarea>
+      <label for="monitoring">Monitoring & Review Plan</label>
+      <textarea id="monitoring" placeholder="How will you monitor the impact of this decision and when will you review it?"></textarea>
+      <div class="btn-row"><button class="btn btn-secondary" onclick="goStep(4)">&#x2190; Back</button><button class="btn btn-primary" onclick="generateSummary()">Generate Summary</button></div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary" id="summary"></div>
+
+    <footer>LU1 Topic 3: Apply Ethical Principles in Decision-Making &mdash; Responsible Generative AI Basics</footer>
+  </div>
+  <script>
+    const STEPS=['Scenario','Stakeholders','Risks','Principles','Alternatives','Decision'];
+    const SAMPLES=[
+      "A company wants to use AI to screen and rank job applicants automatically. The AI would analyse resumes, cover letters, and video interviews to produce a shortlist. The system would process thousands of applications per week, replacing the initial human screening stage.",
+      "A hospital is considering deploying an AI system to generate preliminary medical reports from patient scans. Radiologists would review the AI's reports but are expected to process 3x more cases per day. The hospital faces a staff shortage and growing patient waitlists.",
+      "A school district proposes installing AI-powered facial recognition cameras to enhance campus security. The system would verify student and staff identities, flag unauthorized visitors, and track attendance automatically. Parents and teachers have mixed opinions.",
+      "A social media platform wants to deploy AI to automatically moderate content at scale, including detecting hate speech, misinformation, and graphic content. The AI would make instant removal decisions for flagged content, with human reviewers handling appeals.",
+      "A city police department is evaluating an AI system that predicts crime hotspots and suggests patrol routes. The system uses historical crime data, demographic information, and socioeconomic indicators. Civil rights groups have raised concerns about potential bias."
+    ];
+    let currentStep=0;
+
+    function renderStepper(){
+      let html='';
+      STEPS.forEach((s,i)=>{
+        const cls=i<currentStep?'done':i===currentStep?'active':'';
+        html+=`<div class="step ${cls}"><div class="step-circle">${i+1}</div><div class="step-label">${s}</div></div>`;
+      });
+      document.getElementById('stepper').innerHTML=html;
+    }
+
+    function goStep(n){
+      document.getElementById(`step${currentStep}`).classList.remove('active');
+      currentStep=n;
+      document.getElementById(`step${currentStep}`).classList.add('active');
+      document.getElementById('summary').classList.remove('visible');
+      renderStepper();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function useSample(i){document.getElementById('scenario').value=SAMPLES[i];}
+
+    function generateSummary(){
+      const data={
+        scenario:document.getElementById('scenario').value||'Not provided',
+        stakeholders:document.getElementById('stakeholders').value||'Not provided',
+        benefits:document.getElementById('benefits').value||'Not provided',
+        risks:document.getElementById('risks').value||'Not provided',
+        principles:[],
+        principleNotes:document.getElementById('principleNotes').value||'Not provided',
+        alternatives:document.getElementById('alternatives').value||'Not provided',
+        decision:document.getElementById('decision').value||'Not provided',
+        monitoring:document.getElementById('monitoring').value||'Not provided'
+      };
+      ['fairness','transparency','accountability','privacy','beneficence','agency'].forEach(p=>{
+        if(document.getElementById('p_'+p).checked)data.principles.push(p.charAt(0).toUpperCase()+p.slice(1));
+      });
+
+      const stakeholderList=data.stakeholders.split('\n').filter(s=>s.trim()).map(s=>`<li>${s.trim()}</li>`).join('');
+      const principlesList=data.principles.length?data.principles.join(', '):'None selected';
+
+      const html=`<h2>Ethical Decision Analysis Summary</h2>
+        <div class="summary-section"><h3>1. Scenario</h3><p>${data.scenario.replace(/\n/g,'<br>')}</p></div>
+        <div class="summary-section"><h3>2. Stakeholders</h3><ul>${stakeholderList||'<li>Not provided</li>'}</ul></div>
+        <div class="summary-section"><h3>3. Benefits</h3><p>${data.benefits.replace(/\n/g,'<br>')}</p></div>
+        <div class="summary-section"><h3>4. Risks</h3><p>${data.risks.replace(/\n/g,'<br>')}</p></div>
+        <div class="summary-section"><h3>5. Ethical Principles</h3><p><strong>Applicable principles:</strong> ${principlesList}</p><p>${data.principleNotes.replace(/\n/g,'<br>')}</p></div>
+        <div class="summary-section"><h3>6. Alternatives Considered</h3><p>${data.alternatives.replace(/\n/g,'<br>')}</p></div>
+        <div class="summary-section"><h3>7. Decision</h3><p>${data.decision.replace(/\n/g,'<br>')}</p></div>
+        <div class="summary-section"><h3>8. Monitoring & Review</h3><p>${data.monitoring.replace(/\n/g,'<br>')}</p></div>
+        <div class="summary-actions"><button class="btn btn-secondary" onclick="printSummary()">Print / Save as PDF</button><button class="btn btn-primary" onclick="resetForm()">Start New Analysis</button></div>`;
+
+      document.getElementById('step5').classList.remove('active');
+      const sum=document.getElementById('summary');
+      sum.innerHTML=html;
+      sum.classList.add('visible');
+      currentStep=6;
+      renderStepper();
+      window.scrollTo({top:sum.offsetTop-20,behavior:'smooth'});
+    }
+
+    function printSummary(){window.print();}
+
+    function resetForm(){
+      ['scenario','stakeholders','benefits','risks','principleNotes','alternatives','decision','monitoring'].forEach(id=>document.getElementById(id).value='');
+      ['fairness','transparency','accountability','privacy','beneficence','agency'].forEach(p=>document.getElementById('p_'+p).checked=false);
+      document.getElementById('summary').classList.remove('visible');
+      goStep(0);
+    }
+
+    function toggleTheme(){const h=document.documentElement,c=h.getAttribute('data-theme'),n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('theme',n);updateBtn(n);}
+    function updateBtn(t){document.getElementById('themeIcon').innerHTML=t==='dark'?'&#x2600;&#xFE0F;':'&#x1F319;';document.getElementById('themeLabel').textContent=t==='dark'?'Light':'Dark';}
+    (function(){const s=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',s);updateBtn(s);renderStepper();})();
+  </script>
+</body>
+</html>
