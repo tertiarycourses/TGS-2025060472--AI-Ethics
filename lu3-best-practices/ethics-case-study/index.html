@@ -97,7 +97,7 @@
       <h1>AI Ethics Case Study Analyzer</h1>
       <p>Explore real-world AI ethics cases, identify issues, and propose solutions. Use AI to deepen your analysis.</p>
     </header>
-    <div class="nav-bar"><a href="../../hub/">&#x2190; Back to Course Hub</a></div>
+    <div class="nav-bar"><a href="../../">&#x2190; Back to Course Hub</a></div>
 
     <!-- Gemini API -->
     <div class="gemini-section">
@@ -151,7 +151,7 @@
     function renderCases(){
       const filtered=activeFilter==='all'?CASES:CASES.filter(c=>c.domain===activeFilter);
       document.getElementById('caseList').innerHTML=filtered.map(c=>`
-        <div class="case-card" id="case${c.id}" onclick="toggleCase(${c.id})">
+        <div class="case-card" id="case${c.id}" onclick="toggleCase(${c.id},event)">
           <div class="case-header">
             <div>
               <div class="case-meta"><span class="case-tag tag-${c.domain}">${c.domain}</span></div>
@@ -181,7 +181,8 @@
       `).join('');
     }
 
-    function toggleCase(id){
+    function toggleCase(id,event){
+      if(event&&event.target.closest('.case-detail')){return;}
       const card=document.getElementById('case'+id);
       card.classList.toggle('expanded');
     }
